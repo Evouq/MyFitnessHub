@@ -4,14 +4,16 @@ import evouq.model.*;
 
 import java.io.*;
 import java.sql.Time;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static java.lang.System.*;
 
 public class CsvParser {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ParseException {
         readCsv();
 
         String line = "";
@@ -36,15 +38,15 @@ public class CsvParser {
             key++;
         }
         br.close();
-        printClub(clubs);
+        //printClub(clubs);
 
 
         //Parsing file user
         File fileUsers = new File(folder, "user.csv");
         br = new BufferedReader(new FileReader(fileUsers));
         LinkedList<User> users = new LinkedList<>();
-        //id;role;name;age;phone;isDeleted;login;password;idClub
-        //1;user;Новиков Максим Вадимович;23;375298562314;0;nov23;123456;2
+        //id;;name;age;phone;isDeleted;login;password;idClub;createAt
+        //1;Новиков Максим Вадимович;23;375000000000;0;nov23;123456;2;01.02.2019
         while((line = br.readLine()) != null) {
             String[] values = line.split(separator);
             User user = new User();
@@ -56,12 +58,14 @@ public class CsvParser {
             user.setLogin(values[5]);
             user.setPassword(values[6]);
             user.setClub(clubs.get(Long.parseLong(values[7])));
-            user.setRole(Roles.valueOf(values[9].toUpperCase()));
+            user.setCreatedAt(parseDate(values[8]));
+            //user.setRole(Roles.valueOf(values[9].toUpperCase()));
             users.add(user);
         }
         br.close();
+        printUser(users);
 
-        out.print(users);
+        //out.print(users);
 
         //Parsing file branch
         final String  PATTERN = "K:mm";
@@ -328,13 +332,20 @@ public class CsvParser {
                     "phone: " + counter.getPhone() + splits[0] +
                     "isDeleted: " + counter.getDeleted() + splits[0] +
                     "login: " + counter.getLogin() + splits[0] +
-                    "password: " + counter.getPassword());
+                    "password: " + counter.getPassword()+ splits[0] +
+                    "createdAt: " + counter.getCreatedAt());
             Club userClub = counter.getClub();
             out.println("Club: id: " + userClub.getId() + splits[1] +
                     "name: " + userClub.getName() + splits[1] +
                     "email: " + userClub.getEmail() + splits[1] +
                     "contNumber: " + userClub.getContNumber() + splits[1]);
         }
+    }
+
+    private static Date parseDate (String date) throws ParseException {
+        DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        Date formatedDate = dateFormat.parse(date);
+        return formatedDate;
     }
 
 }
